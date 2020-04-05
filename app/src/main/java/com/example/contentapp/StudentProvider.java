@@ -1,10 +1,12 @@
 package com.example.contentapp;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
@@ -98,7 +100,13 @@ public class StudentProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
-        return null;
+        long rowID = db.insert(TABLE_NAME, null, values);
+        if (rowID > 0) {
+            Uri _uri = ContentUris.withAppendedId(CONTENT_URI, rowID);
+            getContext().getContentResolver().notifyChange(_uri, null);
+
+        }
+        throw new SQLException("failed to add a record into " + uri);
     }
 
     // override delete
@@ -107,7 +115,7 @@ public class StudentProvider extends ContentProvider {
         return 0;
     }
 
-    // override updade
+    // override update
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
         return 0;
